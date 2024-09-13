@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 import { startGame, toggleMenu } from "./ComputerSlice";
 import { AnimatePresence, motion } from "framer-motion";
+import { RootState } from "../Store";
 
 const MenuBox = () => {
-  const { isMenuOpen } = useSelector((store) => store.computer);
+  const { isMenuOpen } = useSelector((store: RootState) => store.computer);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

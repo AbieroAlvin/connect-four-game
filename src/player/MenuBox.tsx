@@ -2,9 +2,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { startGame, toggleMenu } from "./PlayerSlice";
 import { AnimatePresence, motion } from "framer-motion";
+import { RootState } from "../Store";
 
 const MenuBox = () => {
-  const { isMenuOpen } = useSelector((store) => store.player);
+  const { isMenuOpen } = useSelector((store: RootState) => store.player);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

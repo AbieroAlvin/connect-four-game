@@ -16,7 +16,6 @@ const PlayerBoardHeader = () => {
   };
   return (
     <motion.header
-      header
       className="mb-24 mt-12 flex w-[40%] items-center justify-between desktop:w-[70%] tablet:px-7 mobile:mb-20 mobile:w-full"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}

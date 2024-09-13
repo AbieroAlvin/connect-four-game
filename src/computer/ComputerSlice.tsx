@@ -1,10 +1,25 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialGameBoard = Array.from({ length: 6 }, () => Array(7).fill(null));
+type Cell = "counter-red-large" | "counter-yellow-large" | null;
 
-const initialState = {
-  playerScore: parseInt(localStorage.getItem("playerScore")) || 0,
-  computerScore: parseInt(localStorage.getItem("computerScore")) || 0,
+interface GameState {
+  playerScore: number;
+  computerScore: number;
+  currentPlayer: "player" | "computer";
+  winner: "player" | "computer" | "tie" | null;
+  timer: number;
+  gameBoard: Cell[][];
+  winningTiles: [number, number][];
+  isMenuOpen: boolean;
+}
+
+const initialGameBoard: Cell[][] = Array.from({ length: 6 }, () =>
+  Array(7).fill(null)
+);
+
+const initialState: GameState = {
+  playerScore: parseInt(localStorage.getItem("playerScore") || "0", 10),
+  computerScore: parseInt(localStorage.getItem("computerScore") || "0", 10),
   currentPlayer: "player",
   winner: null,
   timer: 30,
@@ -34,7 +49,6 @@ const computerSlice = createSlice({
     },
     startGame(state) {
       state.gameBoard = initialGameBoard;
-
       state.currentPlayer =
         state.currentPlayer === "player" ? "player" : "computer";
       state.winner = null;
@@ -42,13 +56,18 @@ const computerSlice = createSlice({
       state.winningTiles = [];
       state.isMenuOpen = false;
     },
-    dropBall(state, action) {
+    dropBall(
+      state,
+      action: PayloadAction<{
+        column: number;
+        currentPlayer: "player" | "computer";
+      }>
+    ) {
       const { column, currentPlayer } = action.payload;
-      // const isSmallScreen = window.innerWidth <= 700;
 
       for (let row = 5; row >= 0; row--) {
         if (!state.gameBoard[row][column]) {
-          state.gameBoard[row][column] = state.gameBoard[row][column] =
+          state.gameBoard[row][column] =
             currentPlayer === "player"
               ? "counter-red-large"
               : "counter-yellow-large";
@@ -63,10 +82,15 @@ const computerSlice = createSlice({
     },
     checkForWin(state) {
       const { gameBoard, currentPlayer } = state;
-      let winningCombination = null;
+      let winningCombination: [number, number][] | null = null;
 
-      const checkDirection = (startRow, startCol, rowDelta, colDelta) => {
-        const cellValue =
+      const checkDirection = (
+        startRow: number,
+        startCol: number,
+        rowDelta: number,
+        colDelta: number
+      ) => {
+        const cellValue: Cell =
           currentPlayer === "player"
             ? "counter-red-large"
             : "counter-yellow-large";
@@ -75,7 +99,6 @@ const computerSlice = createSlice({
           const row = startRow + i * rowDelta;
           const col = startCol + i * colDelta;
 
-          // Check if the cell is out of bounds or has a different value
           if (
             row < 0 ||
             row >= 6 ||
@@ -90,44 +113,26 @@ const computerSlice = createSlice({
         winningCombination = Array.from({ length: 4 }, (_, i) => [
           startRow + i * rowDelta,
           startCol + i * colDelta,
-        ]);
+        ]) as [number, number][];
         return true;
       };
 
-      // Check for horizontal win
+      // Check for horizontal, vertical, and diagonal wins
       for (let row = 0; row < 6; row++) {
-        for (let col = 0; col < 4; col++) {
-          if (checkDirection(row, col, 0, 1)) {
-            state.winner = currentPlayer;
-            break;
-          }
-        }
-      }
-
-      // Check for vertical win
-      for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 7; col++) {
-          if (checkDirection(row, col, 1, 0)) {
+          if (col < 4 && checkDirection(row, col, 0, 1)) {
             state.winner = currentPlayer;
             break;
           }
-        }
-      }
-
-      // Check for diagonal win (top-left to bottom-right)
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 4; col++) {
-          if (checkDirection(row, col, 1, 1)) {
+          if (row < 3 && checkDirection(row, col, 1, 0)) {
             state.winner = currentPlayer;
             break;
           }
-        }
-      }
-
-      // Check for diagonal win (bottom-left to top-right)
-      for (let row = 3; row < 6; row++) {
-        for (let col = 0; col < 4; col++) {
-          if (checkDirection(row, col, -1, 1)) {
+          if (row < 3 && col < 4 && checkDirection(row, col, 1, 1)) {
+            state.winner = currentPlayer;
+            break;
+          }
+          if (row >= 3 && col < 4 && checkDirection(row, col, -1, 1)) {
             state.winner = currentPlayer;
             break;
           }
@@ -147,7 +152,7 @@ const computerSlice = createSlice({
         state.winningTiles = winningCombination;
       }
     },
-    toggleMenu(state, action) {
+    toggleMenu(state, action: PayloadAction<boolean>) {
       state.isMenuOpen = action.payload;
     },
     resetGame(state) {
@@ -175,5 +180,4 @@ export const {
   startGame,
   toggleMenu,
   resetGame,
-  makeComputerMove,
 } = computerSlice.actions;

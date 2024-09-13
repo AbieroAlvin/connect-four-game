@@ -1,6 +1,18 @@
 import { motion } from "framer-motion";
 
-const ScoreBoard = ({ img, score, player, from }) => {
+interface ScoreBoardProps {
+  img: string;
+  score: number;
+  player: string;
+  from: "left" | "right";
+}
+
+const ScoreBoard: React.FC<ScoreBoardProps> = ({
+  img,
+  score,
+  player,
+  from,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: from === "left" ? -100 : 100 }}

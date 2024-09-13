@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 
@@ -13,18 +13,19 @@ import {
 import { determineComputerMove } from "./computerHelpers";
 
 import GameBoardItem from "../ui/GameBoardItem";
+import { RootState } from "../Store";
 
-interface GameState {
-  currentPlayer: "player" | "computer";
-  gameBoard: string[][];
-  winner: "player" | "computer" | "tie" | null;
-  winningTiles: [number, number][] | null;
-  isMenuOpen: boolean;
-}
+// interface GameBoardState {
+//   currentPlayer: "player" | "computer";
+//   gameBoard: string[][];
+//   winner: "player" | "computer" | "tie" | null;
+//   winningTiles: [number, number][] | null;
+//   isMenuOpen: boolean;
+// }
 
 const ComputerGameBoard: React.FC = () => {
   const { currentPlayer, gameBoard, winner, winningTiles, isMenuOpen } =
-    useSelector((store: { computer: GameState }) => store.computer);
+    useSelector((store: RootState) => store.computer);
   const dispatch = useDispatch();
   const [isWinnerUpdated, setIsWinnerUpdated] = useState(false);
 
@@ -43,20 +44,15 @@ const ComputerGameBoard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!winner) {
-      if (currentPlayer === "computer") {
-        const computerMove = determineComputerMove(gameBoard);
-        const randomDelay =
-          Math.floor(Math.random() * (4000 - 1000 + 1)) + 1000;
+    if (!winner && currentPlayer === "computer") {
+      const computerMove = determineComputerMove(gameBoard);
+      const randomDelay = Math.floor(Math.random() * (4000 - 1000 + 1)) + 1000;
 
-        setTimeout(() => {
-          dispatch(
-            dropBall({ column: computerMove, currentPlayer: "computer" })
-          );
-          dispatch(checkForWin());
-          dispatch(switchPlayer());
-        }, randomDelay);
-      }
+      setTimeout(() => {
+        dispatch(dropBall({ column: computerMove, currentPlayer: "computer" }));
+        dispatch(checkForWin());
+        dispatch(switchPlayer());
+      }, randomDelay);
     }
   }, [winner, currentPlayer, dispatch, gameBoard]);
 
@@ -65,13 +61,10 @@ const ComputerGameBoard: React.FC = () => {
       if (winner === "player") {
         dispatch(updatePlayerScore());
         setIsWinnerUpdated(true);
-      }
-      if (winner === "computer") {
+      } else if (winner === "computer") {
         dispatch(updateComputerScore());
         setIsWinnerUpdated(true);
-      }
-
-      if (winner === "tie") {
+      } else if (winner === "tie") {
         setIsWinnerUpdated(true);
       }
     }
@@ -80,9 +73,9 @@ const ComputerGameBoard: React.FC = () => {
   }, [dispatch, winner, isMenuOpen, isWinnerUpdated]);
 
   useEffect(() => {
-    let timerInterval: ReturnType<typeof setInterval> | undefined;
+    let timerInterval: number | undefined;
     if (!winner && !isMenuOpen) {
-      timerInterval = setInterval(() => {
+      timerInterval = window.setInterval(() => {
         dispatch(updateTimer());
       }, 1000);
     }
@@ -109,7 +102,7 @@ const ComputerGameBoard: React.FC = () => {
         row.map((cell, columnIndex) => (
           <button
             key={`${rowIndex}-${columnIndex}`}
-            className="cell relative z-20 h-[6.4rem] w-[6.4rem] cursor-pointer rounded-full tablet:h-[3.8rem] tablet:w-[3.8rem] "
+            className="cell relative z-20 h-[6.4rem] w-[6.4rem] cursor-pointer rounded-full tablet:h-[3.8rem] tablet:w-[3.8rem]"
             onClick={() => handleColumnClick(columnIndex)}
           >
             {cell && (

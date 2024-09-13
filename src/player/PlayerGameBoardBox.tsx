@@ -2,9 +2,11 @@ import { useSelector } from "react-redux";
 import PlayerGameBoard from "./PlayerGameBoard";
 import ScoreBoard from "../ui/ScoreBoard";
 
+import { RootState } from "../Store";
+
 const PlayerGameBoardBox = () => {
   const { playerOneScore, playerTwoScore } = useSelector(
-    (store) => store.player
+    (store: RootState) => store.player
   );
   return (
     <div

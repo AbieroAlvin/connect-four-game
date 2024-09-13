@@ -11,14 +11,16 @@ import {
   updateTimer,
 } from "../player/PlayerSlice";
 
+import { RootState } from "../Store";
+
 import GameBoardItem from "../ui/GameBoardItem";
 
 const PlayerGameBoard = () => {
   const { currentPlayer, gameBoard, winner, winningTiles, isMenuOpen } =
-    useSelector((store) => store.player);
+    useSelector((store: RootState) => store.player);
   const dispatch = useDispatch();
 
-  const handleColumnClick = (column) => {
+  const handleColumnClick = (column: number) => {
     if (!winner) {
       if (gameBoard[0][column]) {
         return;
@@ -52,9 +54,9 @@ const PlayerGameBoard = () => {
   }, [dispatch, winner, isMenuOpen, isWinnerUpdated]);
 
   useEffect(() => {
-    let timerInterval;
+    let timerInterval: number | undefined;
     if (!winner && !isMenuOpen) {
-      timerInterval = setInterval(() => {
+      timerInterval = window.setInterval(() => {
         dispatch(updateTimer());
       }, 1000);
     }

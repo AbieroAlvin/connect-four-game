@@ -2,9 +2,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { startGame } from "../player/PlayerSlice";
 import Button from "../ui/Button";
+import { RootState } from "../Store";
 
 const ScoreBackground = () => {
-  const { currentPlayer, timer, winner } = useSelector((store) => store.player);
+  const { currentPlayer, timer, winner } = useSelector(
+    (store: RootState) => store.player
+  );
   const dispatch = useDispatch();
 
   function handleRestartGame() {

@@ -1,11 +1,26 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialGameBoard = Array.from({ length: 6 }, () => Array(7).fill(null));
+type Player = "playerOne" | "playerTwo" | "tie" | null;
+type GameBoard = (string | null)[][];
 
-const initialState = {
-  playerOneScore: parseInt(localStorage.getItem("playerOneScore")) || 0,
-  playerTwoScore: parseInt(localStorage.getItem("playerTwoScore")) || 0,
+interface GameState {
+  playerOneScore: number;
+  playerTwoScore: number;
+  currentPlayer: Player;
+  winner: Player;
+  timer: number;
+  gameBoard: GameBoard;
+  winningTiles: [number, number][];
+  isMenuOpen: boolean;
+}
 
+const initialGameBoard: GameBoard = Array.from({ length: 6 }, () =>
+  Array(7).fill(null)
+);
+
+const initialState: GameState = {
+  playerOneScore: parseInt(localStorage.getItem("playerOneScore") || "0", 10),
+  playerTwoScore: parseInt(localStorage.getItem("playerTwoScore") || "0", 10),
   currentPlayer: "playerOne",
   winner: null,
   timer: 30,
@@ -36,20 +51,21 @@ const playerSlice = createSlice({
     },
     startGame(state) {
       state.gameBoard = initialGameBoard;
-
-      state.currentPlayer =
-        state.currentPlayer === "playerOne" ? "playerOne" : "playerTwo";
+      state.currentPlayer = "playerOne";
       state.winner = null;
       state.timer = 30;
       state.winningTiles = [];
       state.isMenuOpen = false;
     },
-    dropBall(state, action) {
+    dropBall(
+      state,
+      action: PayloadAction<{ column: number; currentPlayer: Player }>
+    ) {
       const { column, currentPlayer } = action.payload;
 
       for (let row = 5; row >= 0; row--) {
         if (!state.gameBoard[row][column]) {
-          state.gameBoard[row][column] = state.gameBoard[row][column] =
+          state.gameBoard[row][column] =
             currentPlayer === "playerOne"
               ? "counter-red-large"
               : "counter-yellow-large";
@@ -64,9 +80,14 @@ const playerSlice = createSlice({
     },
     checkForWin(state) {
       const { gameBoard, currentPlayer } = state;
-      let winningCombination = null;
+      let winningCombination: [number, number][] | null = null;
 
-      const checkDirection = (startRow, startCol, rowDelta, colDelta) => {
+      const checkDirection = (
+        startRow: number,
+        startCol: number,
+        rowDelta: number,
+        colDelta: number
+      ): boolean => {
         const cellValue =
           currentPlayer === "playerOne"
             ? "counter-red-large"
@@ -76,7 +97,6 @@ const playerSlice = createSlice({
           const row = startRow + i * rowDelta;
           const col = startCol + i * colDelta;
 
-          // Check if the cell is out of bounds or has a different value
           if (
             row < 0 ||
             row >= 6 ||
@@ -91,11 +111,10 @@ const playerSlice = createSlice({
         winningCombination = Array.from({ length: 4 }, (_, i) => [
           startRow + i * rowDelta,
           startCol + i * colDelta,
-        ]);
+        ]) as [number, number][];
         return true;
       };
 
-      //  Check for horizontal win
       for (let row = 0; row < 6; row++) {
         for (let col = 0; col < 4; col++) {
           if (checkDirection(row, col, 0, 1)) {
@@ -105,7 +124,6 @@ const playerSlice = createSlice({
         }
       }
 
-      //  Check for vertical win
       for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 7; col++) {
           if (checkDirection(row, col, 1, 0)) {
@@ -115,7 +133,6 @@ const playerSlice = createSlice({
         }
       }
 
-      // Check for diagonal win (top-left to bottom-right)
       for (let row = 0; row < 3; row++) {
         for (let col = 0; col < 4; col++) {
           if (checkDirection(row, col, 1, 1)) {
@@ -125,7 +142,6 @@ const playerSlice = createSlice({
         }
       }
 
-      // Check for diagonal win (bottom-left to top-right)
       for (let row = 3; row < 6; row++) {
         for (let col = 0; col < 4; col++) {
           if (checkDirection(row, col, -1, 1)) {
@@ -135,7 +151,6 @@ const playerSlice = createSlice({
         }
       }
 
-      // Check for a tie
       const isTie = gameBoard.every((row) =>
         row.every((cell) => cell !== null)
       );
@@ -143,12 +158,11 @@ const playerSlice = createSlice({
         state.winner = "tie";
       }
 
-      // Set the winning tiles
       if (state.winner && winningCombination) {
         state.winningTiles = winningCombination;
       }
     },
-    toggleMenu(state, action) {
+    toggleMenu(state, action: PayloadAction<boolean>) {
       state.isMenuOpen = action.payload;
     },
     resetGame(state) {

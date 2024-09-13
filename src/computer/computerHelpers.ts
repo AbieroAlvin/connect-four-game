@@ -1,11 +1,14 @@
+type Cell = "counter-red-large" | "counter-yellow-large" | null;
+type Player = "player" | "computer";
+
 const checkDirection = (
-  startRow,
-  startCol,
-  rowDelta,
-  colDelta,
-  currentPlayer,
-  board
-) => {
+  startRow: number,
+  startCol: number,
+  rowDelta: number,
+  colDelta: number,
+  currentPlayer: Player,
+  board: Cell[][]
+): boolean => {
   const ROWS = board.length;
   const COLS = board[0].length;
   const cellValue =
@@ -29,7 +32,7 @@ const checkDirection = (
   return true;
 };
 
-const checkForComputerWin = (board, currentPlayer) => {
+const checkForComputerWin = (board: Cell[][], currentPlayer: Player) => {
   const ROWS = board.length;
   const COLS = board[0].length;
 
@@ -53,7 +56,11 @@ const checkForComputerWin = (board, currentPlayer) => {
   return false;
 };
 
-const simulateMove = (board, column, currentPlayer) => {
+const simulateMove = (
+  board: Cell[][],
+  column: number,
+  currentPlayer: Player
+) => {
   const tempBoard = board.map((row) => row.slice());
   for (let row = tempBoard.length - 1; row >= 0; row--) {
     if (!tempBoard[row][column]) {
@@ -67,7 +74,7 @@ const simulateMove = (board, column, currentPlayer) => {
   return tempBoard;
 };
 
-const determineComputerMove = (board) => {
+const determineComputerMove = (board: Cell[][]) => {
   const availableColumns = board[0]
     .map((cell, index) => (cell === null ? index : null))
     .filter((col) => col !== null);

@@ -3,9 +3,11 @@ import { startGame } from "../computer/ComputerSlice";
 import { motion } from "framer-motion";
 import Button from "../ui/Button";
 
+import { RootState } from "../Store";
+
 function ScoreBackground() {
   const { currentPlayer, timer, winner } = useSelector(
-    (store) => store.computer
+    (store: RootState) => store.computer
   );
   const dispatch = useDispatch();
 
